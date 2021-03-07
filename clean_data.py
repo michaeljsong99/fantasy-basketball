@@ -4,7 +4,6 @@ The purpose of this module is to clean the data so we can use it for training.
 
 
 import pandas as pd
-from sklearn import preprocessing
 
 # Logging
 import logging
@@ -20,11 +19,14 @@ formatter = logging.Formatter(
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
+from config import Config
+
 
 class DataCleaner:
-    def __init__(self, earliest_season=2000):
+    def __init__(self):
         self.season_stats = pd.read_csv("raw_data/season_stats.csv")
-        self.earliest_season = earliest_season
+        config = Config()
+        self.earliest_season = config.start_year
         self.players = set()
         self.stats_by_season = {}
         self.training_data = {}
@@ -109,11 +111,6 @@ class DataCleaner:
 
         self.stats_by_season = {}
 
-        # Historically, there have been a few seasons that have had less games played.
-        # Additionally, certain metrics will change over time (i.e. points, 3-pointers made).
-        # We want to normalize the stats for each season as well.
-        self.normalized_stats_by_season = {}
-
         latest_season = max(self.season_stats["Year"])
         for year in range(self.earliest_season, latest_season + 1):
             stats_in_year = self.season_stats.loc[self.season_stats["Year"] == year]
@@ -124,7 +121,9 @@ class DataCleaner:
             player_stats_for_year = stats_in_year.to_dict(orient="index")
             self.stats_by_season[year] = player_stats_for_year
 
-            # Now add the normalized stats. These will be used for training.
+            # Historically, there have been a few seasons that have had less games played.
+            # Additionally, certain metrics will change over time (i.e. points, 3-pointers made).
+            # We want to normalize the stats for each season as well for training.
             normalized_stats = (stats_in_year - stats_in_year.min()) / (
                 stats_in_year.max() - stats_in_year.min()
             )
@@ -146,34 +145,38 @@ class DataCleaner:
             ]
             normalized_stats.drop(total_stat_cols, axis=1, inplace=True)
             normalized_player_stats_for_year = normalized_stats.to_dict(orient="index")
-            self.normalized_stats_by_season[year] = normalized_player_stats_for_year
+            self.normalized_training_data[year] = normalized_player_stats_for_year
 
         # Now remove rookies and players that did not play in the previous year from each year.
         final_stats_by_season = {
             self.earliest_season: self.stats_by_season[self.earliest_season]
         }
-        final_normalized_stats_by_season = {
-            self.earliest_season: self.normalized_stats_by_season[self.earliest_season]
-        }
+
         for year in range(self.earliest_season + 1, latest_season + 1):
             players = list(self.stats_by_season[year].keys())
             final_players_for_season = {}
-            final_normalized_players_for_season = {}
             for player in players:
                 if player in self.stats_by_season[year - 1]:
                     final_players_for_season[player] = self.stats_by_season[year][
                         player
                     ]
-                    final_normalized_players_for_season[
-                        player
-                    ] = self.normalized_stats_by_season[year][player]
+
             final_stats_by_season[year] = final_players_for_season
-            final_normalized_stats_by_season[year] = final_normalized_players_for_season
             logger.info(
                 f"{len(final_players_for_season.keys())} players selected for year {year}."
             )
         self.training_data = final_stats_by_season
-        self.normalized_training_data = final_normalized_stats_by_season
+
+    def _validate_data(self):
+        # Check to make sure that for each year, if there is a player, we have their previous season data.
+        for year in range(self.earliest_season + 1, max(self.training_data.keys()) + 1):
+            players = list(self.training_data[year].keys())
+            for player in players:
+                if player not in self.normalized_training_data[year - 1]:
+                    raise RuntimeError(
+                        f"Player in year {year} but not found for year {year-1}: {player}"
+                    )
+        logger.info("Player data validated.")
 
     def data_cleaning_pipeline(self):
         """
@@ -183,6 +186,7 @@ class DataCleaner:
         """
         self._clean_season_stats()
         self._select_training_data()
+        self._validate_data()
         return self.training_data, self.normalized_training_data
 
 

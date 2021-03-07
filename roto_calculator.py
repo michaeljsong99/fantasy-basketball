@@ -9,6 +9,8 @@ The team that accumulates the most points wins.
 from collections import defaultdict
 import random
 
+from config import Config
+
 
 class RotoCalculator:
     def __init__(self, season_data):
@@ -17,6 +19,7 @@ class RotoCalculator:
         :param season_data: A dictionary with players as keys and their attributes as values.
         """
         self.season_data = season_data
+        self.config = Config()
 
     def calculate_team_stats(self, team):
         """
@@ -65,11 +68,9 @@ class RotoCalculator:
         ]
         return teams
 
-    def run_simulation(self, num_teams=8, team_size=13):
+    def run_simulation(self):
         """
         Runs a ROTO full-season simulation for a fantasy league with randomly selected players.
-        :param num_teams: The number of teams in the league.
-        :param team_size: The size of each team.
         :return: A dictionary, with the five keys being:
             - 'team' - a list of player names on the team.
             - 'total_fantasy_pts' - the total amount of fantasy points scored.
@@ -78,6 +79,8 @@ class RotoCalculator:
             - 'stats' - the cumulative stats that the team achieved during the season for each category.
             - 'overall_rank' - the overall rank of the team. 1 being highest, num_teams being the lowest.
         """
+        num_teams = self.config.num_teams
+        team_size = self.config.team_size
         teams = self.randomly_pick_teams(num_teams=num_teams, team_size=team_size)
 
         all_team_info = []
