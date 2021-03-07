@@ -1,15 +1,19 @@
-# Library imports
-import random
-
 # Local module imports
 from clean_data import DataCleaner
-from roto_calculator import RotoCalculator
+from training_data_generator import TrainingDataGenerator
 
-if __name__ == "__main__":
+
+def generate_training_data():
     data_cleaner = DataCleaner()
     training_data, normalized_training_data = data_cleaner.data_cleaning_pipeline()
-    players_2017 = training_data[2017]
+    training_data_generator = TrainingDataGenerator(season_stats=training_data,
+                                                    normalized_season_stats=normalized_training_data)
 
-    roto = RotoCalculator(season_data=players_2017)
-    results = roto.run_simulation()
-    print(results)
+
+if __name__ == "__main__":
+    generate_training_data()
+    # players_2017 = training_data[2017]
+
+    # roto = RotoCalculator(season_data=players_2017)
+    # results = roto.run_simulation()
+    # print(results)

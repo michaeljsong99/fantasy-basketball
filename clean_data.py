@@ -4,7 +4,6 @@ The purpose of this module is to clean the data so we can use it for training.
 
 
 import pandas as pd
-from sklearn import preprocessing
 
 # Logging
 import logging
@@ -20,11 +19,14 @@ formatter = logging.Formatter(
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
+from config import Config
+
 
 class DataCleaner:
-    def __init__(self, earliest_season=2000):
+    def __init__(self):
         self.season_stats = pd.read_csv("raw_data/season_stats.csv")
-        self.earliest_season = earliest_season
+        config = Config()
+        self.earliest_season = config.start_year
         self.players = set()
         self.stats_by_season = {}
         self.training_data = {}
