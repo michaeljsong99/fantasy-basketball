@@ -61,6 +61,19 @@ class Config:
         # If True, do train-test-val split from all seasons. Otherwise, use the defined seasons for train-test-val.
         self._combine_data = False
 
+        # ML configurations.
+        self._model_configs = {
+            "hidden_layer_sizes": [32, 16],
+            "loss": "mse",  # [mse mae smooth_l1] or any loss that PyTorch nn supports.
+            "activation": "relu",  # [relu leaky_relu sgd]
+            "learning_rate": 0.1,
+            "dropout": False,  # Set False for no dropout. Otherwise, set to a value between 0 and 1.
+            "optimizer": "adam",
+            "weight_decay": 0.01,  # L2 regularization. Should be between 0 (no decay) and 0.1.
+            "epochs": 500,
+            "batch_size": 100,
+        }
+
     @property
     def start_year(self):
         return self._start_year
@@ -96,3 +109,42 @@ class Config:
     @property
     def combine_data(self):
         return self._combine_data
+
+    ########################################################
+    # Neural Network properties
+
+    @property
+    def hidden_layer_sizes(self):
+        return self._model_configs["hidden_layer_sizes"]
+
+    @property
+    def loss_function(self):
+        return self._model_configs["loss"]
+
+    @property
+    def activation(self):
+        return self._model_configs["activation"]
+
+    @property
+    def learning_rate(self):
+        return self._model_configs["learning_rate"]
+
+    @property
+    def dropout(self):
+        return self._model_configs["dropout"]
+
+    @property
+    def optimizer(self):
+        return self._model_configs["optimizer"]
+
+    @property
+    def weight_decay(self):
+        return self._model_configs["weight_decay"]
+
+    @property
+    def epochs(self):
+        return self._model_configs["epochs"]
+
+    @property
+    def batch_size(self):
+        return self._model_configs["batch_size"]
