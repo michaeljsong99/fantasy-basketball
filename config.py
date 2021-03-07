@@ -58,6 +58,9 @@ class Config:
             "total_fantasy_pts",
         ]
 
+        # If True, do train-test-val split from all seasons. Otherwise, use the defined seasons for train-test-val.
+        self._combine_data = False
+
     @property
     def start_year(self):
         return self._start_year
@@ -89,3 +92,7 @@ class Config:
     @property
     def vector_columns(self):
         return self._vector_columns
+
+    @property
+    def combine_data(self):
+        return self._combine_data

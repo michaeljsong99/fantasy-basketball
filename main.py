@@ -1,5 +1,6 @@
 # Local module imports
 from clean_data import DataCleaner
+from ml_workflow import MLWorkflow
 from training_data_generator import TrainingDataGenerator
 
 
@@ -21,9 +22,11 @@ def train_model():
     Call this method in __main__ to perform model training.
     :return:
     """
+    ml_workflow = MLWorkflow()
+    ml_workflow.read_in_data()
     pass
 
 
 if __name__ == "__main__":
     pass
-    # generate_training_data()
+    train_model()

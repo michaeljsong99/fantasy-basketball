@@ -188,7 +188,3 @@ class DataCleaner:
         self._select_training_data()
         self._validate_data()
         return self.training_data, self.normalized_training_data
-
-
-cleaner = DataCleaner()
-data = cleaner.data_cleaning_pipeline()
