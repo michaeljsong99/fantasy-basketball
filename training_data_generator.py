@@ -36,16 +36,14 @@ class TrainingDataGenerator:
         self.normalized_season_stats = normalized_season_stats
         self.config = Config()
 
-    def generate_training_data_for_season(self, season):
+    def generate_training_data_for_season(self, season, data_type):
         season_data = self.season_stats[season]
         roto_calculator = RotoCalculator(season_data=season_data)
         prev_season_stats = self.normalized_season_stats[season - 1]
 
-        training_dir = (
-            f"training_data/{self.config.num_teams}teams_{self.config.team_size}players"
-        )
-        if not os.path.exists(training_dir):
-            os.mkdir(training_dir)
+        data_dir = f"{data_type}_data/{self.config.num_teams}teams_{self.config.team_size}players"
+        if not os.path.exists(data_dir):
+            os.mkdir(data_dir)
 
         training_data = []
 
@@ -75,10 +73,25 @@ class TrainingDataGenerator:
             training_data, columns=self.config.vector_columns
         )
         file_name = f"{season}_{self.config.num_teams}T_{self.config.team_size}P.csv"
-        df.to_csv(os.path.join(training_dir, file_name))
+        df.to_csv(os.path.join(data_dir, file_name))
         logger.info(f"Saved CSV file {file_name}.")
 
-    def generate_training_data(self):
-        for year in self.config.training_years:
-            logger.info(f"Generating training data for year {year} ...")
-            self.generate_training_data_for_season(season=year)
+    def generate_training_data(
+        self, make_training=True, make_test=True, make_validation=True
+    ):
+        if make_training:
+            for year in self.config.training_years:
+                logger.info(f"Generating training data for year {year} ...")
+                self.generate_training_data_for_season(
+                    season=year, data_type="training"
+                )
+        if make_test:
+            for year in self.config.test_years:
+                logger.info(f"Generating test data for year {year} ...")
+                self.generate_training_data_for_season(season=year, data_type="test")
+        if make_validation:
+            for year in self.config.validation_years:
+                logger.info(f"Generating test data for year {year} ...")
+                self.generate_training_data_for_season(
+                    season=year, data_type="validation"
+                )
