@@ -23,7 +23,7 @@ def train_model():
     :return:
     """
     ml_workflow = MLWorkflow()
-    ml_workflow.read_in_data()
+    ml_workflow.train_model()
     pass
 
 
